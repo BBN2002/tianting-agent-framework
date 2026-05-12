@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>天庭智能体框架 · Tianting Agent Framework</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0a0612;
+      --void: #120a1f;
+      --jade: #1a6b5c;
+      --jade-bright: #2ee6c4;
+      --gold: #d4af37;
+      --gold-dim: #8a7020;
+      --cloud: rgba(255, 250, 240, 0.08);
+      --mist: rgba(180, 160, 220, 0.12);
+      --danger: #c44b6b;
+      --serif: "Noto Serif SC", "Songti SC", serif;
+      --brush: "Ma Shan Zheng", cursive;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: var(--serif);
+      background: var(--ink);
+      color: #e8e4f0;
+      overflow-x: hidden;
+    }
+
+    /* 星斗背景 */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 120% 80% at 50% -20%, #2a1848 0%, transparent 55%),
+        radial-gradient(ellipse 80% 50% at 80% 100%, #0d2830 0%, transparent 50%),
+        var(--void);
+      z-index: 0;
+    }
+    .stars::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1.5px 1.5px at 30% 70%, rgba(212,175,55,0.35), transparent),
+        radial-gradient(1px 1px at 70% 85%, rgba(255,255,255,0.2), transparent);
+      background-size: 100% 100%;
+      opacity: 0.7;
+    }
+
+    /* 祥云纹理 */
+    .clouds {
+      position: fixed;
+      bottom: -5%;
+      left: -10%;
+      right: -10%;
+      height: 40vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.35;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 120'%3E%3Cpath fill='%23ffffff08' d='M0 80 Q50 40 100 70 T200 65 T300 75 T400 60 L400 120 L0 120Z'/%3E%3C/svg%3E") repeat-x;
+      background-size: 400px 120px;
+      animation: drift 80s linear infinite;
+    }
+    @keyframes drift { to { transform: translateX(-400px); } }
+
+    .wrap {
+      position: relative;
+      z-index: 2;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 3rem;
+      min-height: 100%;
+    }
+
+    header {
+      text-align: center;
+      padding: 1.5rem 0 2rem;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+      margin-bottom: 1.5rem;
+    }
+    header h1 {
+      font-family: var(--brush);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 400;
+      margin: 0 0 0.35rem;
+      background: linear-gradient(135deg, #fff8e7, var(--gold), #fff8e7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 0.08em;
+    }
+    header p {
+      margin: 0;
+      color: #9a8fb0;
+      font-size: 0.95rem;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border: 1px solid var(--gold-dim);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 280px 1fr 300px;
+    }
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: linear-gradient(145deg, rgba(30, 22, 45, 0.92), rgba(18, 12, 28, 0.95));
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .panel h2 {
+      font-family: var(--brush);
+      font-size: 1.35rem;
+      font-weight: 400;
+      margin: 0 0 0.85rem;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .panel h2 span.icon { font-size: 1.1rem; }
+
+    /* 仙班 */
+    .deity-list { display: flex; flex-direction: column; gap: 0.45rem; }
+    .deity {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .deity:hover, .deity.active {
+      background: var(--cloud);
+      border-color: rgba(212, 175, 55, 0.35);
+    }
+    .deity .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    .deity .name { font-weight: 600; font-size: 0.9rem; }
+    .deity .rank { font-size: 0.7rem; color: #7d7190; }
+    .deity .tier {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(46, 230, 196, 0.12);
+      color: var(--jade-bright);
+    }
+
+    /* 中间 */
+    .main-stack { display: flex; flex-direction: column; gap: 1rem; }
+    textarea.petition {
+      width: 100%;
+      min-height: 100px;
+      resize: vertical;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      background: rgba(0,0,0,0.35);
+      color: #f0ecf8;
+      font-family: var(--serif);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+    textarea.petition:focus {
+      outline: none;
+      border-color: var(--jade-bright);
+      box-shadow: 0 0 0 2px rgba(46, 230, 196, 0.15);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      margin-top: 0.65rem;
+    }
+    button {
+      font-family: var(--serif);
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 0.55rem 1.15rem;
+      font-size: 0.88rem;
+      border: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    button:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b6914, var(--gold), #c9a227);
+      color: #1a1005;
+      font-weight: 700;
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 28px rgba(212, 175, 55, 0.5); }
+    .btn-ghost {
+      background: transparent;
+      color: #c4b8d8;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .btn-ghost:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+    .hall {
+      flex: 1;
+      min-height: 320px;
+      max-height: min(55vh, 520px);
+      overflow-y: auto;
+      padding: 0.75rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .msg {
+      margin-bottom: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 10px;
+      border-left: 3px solid var(--gold-dim);
+      background: rgba(255,255,255,0.03);
+      animation: fadeIn 0.35s ease;
+    }
+    .msg.system { border-left-color: var(--jade-bright); }
+    .msg .who {
+      font-size: 0.75rem;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+    .msg .body { font-size: 0.88rem; line-height: 1.55; color: #dcd6e8; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .decree {
+      margin-top: 0.5rem;
+      padding: 1rem 1.1rem;
+      border: 1px double rgba(212, 175, 55, 0.45);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(40, 28, 20, 0.6), rgba(20, 14, 10, 0.85));
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: #f5ebe0;
+      white-space: pre-wrap;
+    }
+    .decree h3 {
+      font-family: var(--brush);
+      font-size: 1.5rem;
+      margin: 0 0 0.5rem;
+      text-align: center;
+      color: var(--gold);
+    }
+
+    /* 右侧 天运 */
+    .meter-wrap { margin-bottom: 1rem; }
+    .meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #9a8fb0;
+      margin-bottom: 0.35rem;
+    }
+    .meter {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.4);
+      overflow: hidden;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    .meter > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--jade), var(--jade-bright), var(--gold));
+      transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sota-score {
+      text-align: center;
+      padding: 1rem;
+      margin: 0.5rem 0 1rem;
+      border-radius: 12px;
+      background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.15), transparent 70%);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    .sota-score .big {
+      font-family: var(--brush);
+      font-size: 2.8rem;
+      color: var(--jade-bright);
+      line-height: 1;
+    }
+    .sota-score .sub { font-size: 0.78rem; color: #8a8198; margin-top: 0.35rem; }
+
+    .collab {
+      font-size: 0.82rem;
+      color: #a89fc0;
+      line-height: 1.5;
+    }
+    .collab code {
+      font-size: 0.75rem;
+      background: rgba(0,0,0,0.35);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #5c5468;
+    }
+
+    .incense {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: #b8a8d0;
+    }
+    .smoke {
+      width: 6px;
+      height: 20px;
+      background: linear-gradient(to top, rgba(200,200,220,0.4), transparent);
+      border-radius: 50% 50% 0 0;
+      animation: smoke 2s ease-in-out infinite;
+    }
+    @keyframes smoke {
+      0%, 100% { opacity: 0.4; transform: translateY(0) scaleY(1); }
+      50% { opacity: 0.9; transform: translateY(-4px) scaleY(1.2); }
+    }
+
+    .loading-bar {
+      height: 3px;
+      background: rgba(212, 175, 55, 0.2);
+      border-radius: 2px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+      display: none;
+    }
+    .loading-bar.on { display: block; }
+    .loading-bar i {
+      display: block;
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      animation: loadSlide 1.2s ease-in-out infinite;
+    }
+    @keyframes loadSlide { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
+
+    .api-form { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .api-form h3 {
+      font-family: var(--brush);
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--jade-bright);
+      margin: 0 0 0.65rem;
+    }
+    .api-form label.lbl { display: block; font-size: 0.72rem; color: #8a8198; margin: 0.5rem 0 0.2rem; }
+    .api-form input[type="text"],
+    .api-form input[type="password"],
+    .api-form input[type="url"] {
+      width: 100%;
+      padding: 0.45rem 0.55rem;
+      border-radius: 8px;
+      border: 1px solid rgba(212, 175, 55, 0.22);
+      background: rgba(0,0,0,0.35);
+      color: #f0ecf8;
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+    }
+    .api-form input:focus {
+      outline: none;
+      border-color: var(--jade-bright);
+    }
+    .api-form .row-check {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.55rem;
+      font-size: 0.78rem;
+      color: #b8a8d0;
+    }
+    .api-form .row-check input { accent-color: var(--gold); }
+    .api-form .warn {
+      font-size: 0.72rem;
+      color: #c9a86a;
+      line-height: 1.45;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="clouds"></div>
+
+  <div class="wrap">
+    <header>
+      <h1>天庭智能体框架</h1>
+      <p>Tianting Agent Framework — 多仙协同 · 敕令下达 · 赐福 SOTA</p>
+      <span class="badge">凌霄殿 v1.0 · 真模型敕令 · 协作信道</span>
+    </header>
+
+    <div class="grid">
+      <!-- 仙班 -->
+      <aside class="panel">
+        <h2><span class="icon">⚡</span> 天庭编制</h2>
+        <p style="font-size:0.8rem;color:#8a8198;margin:-0.4rem 0 0.8rem;">点选仙神，知其司职与权柄。</p>
+        <div class="deity-list" id="deityList"></div>
+        <div style="margin-top:1rem;padding-top:0.85rem;border-top:1px solid rgba(255,255,255,0.06);">
+          <p id="deityBio" style="font-size:0.82rem;line-height:1.55;color:#c8bfd8;margin:0;">恭候陛下点将。</p>
+        </div>
+      </aside>
+
+      <!-- 主殿 -->
+      <section class="panel main-stack">
+        <h2><span class="icon">🏛</span> 凌霄议政 · 祈愿池</h2>
+        <label for="petition" style="font-size:0.85rem;color:#b0a4c8;">写下凡间要务，焚香上达，众仙合议后赐敕令。</label>
+        <textarea id="petition" class="petition" placeholder="例：请天庭协助把推荐系统 latency 打到 P99 &lt; 20ms，并赐 SOTA 指标……"></textarea>
+        <div class="actions">
+          <button type="button" class="btn-primary" id="btnSummon">焚香合议 · 召仙议政</button>
+          <button type="button" class="btn-ghost" id="btnClear">清空殿议</button>
+          <button type="button" class="btn-ghost" id="btnExport">导出敕令 JSON</button>
+          <span class="incense" id="incenseHint"><span class="smoke"></span>多开一窗，同信道议政即协作</span>
+        </div>
+        <div class="loading-bar" id="loadingBar"><i></i></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
+          <span style="font-size:0.8rem;color:#7d7190;">议政记录</span>
+        </div>
+        <div class="hall" id="hall"></div>
+        <div id="decreeBox" style="display:none;">
+          <h2 style="margin-top:0.5rem;"><span class="icon">📜</span> 玉帝敕令</h2>
+          <div class="decree" id="decreeText"></div>
+        </div>
+      </section>
+
+      <!-- 天运 -->
+      <aside class="panel">
+        <h2><span class="icon">✦</span> 天运赐福面板</h2>
+        <div class="api-form">
+          <h3>天曹 · 文昌阁 API</h3>
+          <label class="lbl" for="apiBase">网关 Base URL（勿尾缀 /v1）</label>
+          <input type="url" id="apiBase" placeholder="https://api.example.com" autocomplete="off" />
+          <label class="lbl" for="apiKey">API Key</label>
+          <input type="password" id="apiKey" placeholder="sk-…" autocomplete="off" />
+          <label class="lbl" for="apiModel">模型 ID</label>
+          <input type="text" id="apiModel" placeholder="如 gpt-4o-mini / 网关内可用模型名" autocomplete="off" />
+          <div class="row-check">
+            <input type="checkbox" id="useLlm" />
+            <label for="useLlm">敕令与议政由真模型生成</label>
+          </div>
+          <div class="row-check">
+            <input type="checkbox" id="saveKey" />
+            <label for="saveKey">将密钥写入本机 localStorage（仅私人设备）</label>
+          </div>
+          <div class="actions" style="margin-top:0.65rem;">
+            <button type="button" class="btn-ghost" id="btnSaveApi">保存天曹设置</button>
+            <button type="button" class="btn-ghost" id="btnClearKey">清除已存密钥</button>
+          </div>
+          <p class="warn">浏览器直连若遇 CORS 拦截，需网关允许来源或改用本地反向代理。切勿把密钥提交到 Git。</p>
+        </div>
+        <div class="sota-score">
+          <div class="big" id="sotaNum">—</div>
+          <div class="sub">综合赐福指数（娱乐向 · 心诚则灵）</div>
+        </div>
+        <div class="meter-wrap">
+          <div class="meter-label"><span>算力劫运化解</span><span id="m1v">0%</span></div>
+          <div class="meter"><i id="m1"></i></div>
+        </div>
+        <div class="meter-wrap">
+          <div class="meter-label"><span>悟道（泛化）</span><span id="m2v">0%</span></div>
+          <div class="meter"><i id="m2"></i></div>
+        </div>
+        <div class="meter-wrap">
+          <div class="meter-label"><span>雷部并行度</span><span id="m3v">0%</span></div>
+          <div class="meter"><i id="m3"></i></div>
+        </div>
+        <div class="meter-wrap">
+          <div class="meter-label"><span>丹鼎蒸馏纯度</span><span id="m4v">0%</span></div>
+          <div class="meter"><i id="m4"></i></div>
+        </div>
+        <p class="collab">
+          <strong style="color:var(--gold);">协作说明：</strong>本页使用 <code>BroadcastChannel('tianting-taf')</code>。
+          同浏览器再开一页本文件，任一窗焚香，他窗同步见仙议。司命簿存于 <code>localStorage</code>。
+        </p>
+      </aside>
+    </div>
+
+    <footer>神话智能体仅供灵感与演示 · 真 SOTA 仍需炼丹与数据 · 愿代码无 bug，愿评审皆过</footer>
+  </div>
+
+  <script>
+    (function () {
+      const DEITIES = [
+        { id: "yudi", name: "玉皇大帝", rank: "元灵统御", tier: "Orchestrator", emoji: "👑", bio: "总摄万灵，裁定优先级与资源劫数。对应：顶层规划、目标分解、最终验收口径。" },
+        { id: "taibai", name: "太白金星", rank: "宣诏度厄", tier: "Intent", emoji: "✨", bio: "善斡旋、润色旨意。对应：需求澄清、提示工程、与人间的接口话术。" },
+        { id: "erlang", name: "二郎真君", rank: "显圣执行", tier: "Agent", emoji: "👁", bio: "三眼洞察，擒妖务尽。对应：长链路执行、工具调用、观测与纠偏。" },
+        { id: "nezha", name: "三坛海会大神", rank: "莲花化身", tier: "Retry", emoji: "🔥", bio: "死而复生，愈战愈勇。对应：自愈重试、A/B 分支、失败样本再炼。" },
+        { id: "liguang", name: "托塔李天王", rank: "玲珑镇界", tier: "Memory", emoji: "🗼", bio: "塔中藏兵。对应：上下文分层、RAG、结构化记忆与权限边界。" },
+        { id: "laojun", name: "太上老君", rank: "八卦炉中", tier: "Optimize", emoji: "⚗️", bio: "炼丹九转。对应：蒸馏、量化、剪枝、对齐人类价值的天条微调。" },
+        { id: "leigong", name: "雷公电母", rank: "并行疾雷", tier: "Async", emoji: "⚡", bio: "雷部齐发。对应：并行 worker、批处理、异步流水线吞吐。" },
+        { id: "kuaifu", name: "夸父", rank: "逐日长追", tier: "Long-ctx", emoji: "🏃", bio: "追日不舍。对应：长上下文、渐进摘要、跨会话追踪。" },
+        { id: "zhinv", name: "织女", rank: "天孙织纹", tier: "Pipeline", emoji: "🧵", bio: "经纬成纹。对应：DAG 编排、数据飞轮、多模态交织。" }
+      ];
+
+      const DIALOGUES = [
+        (t) => `太白金星：「${t.slice(0, 24)}${t.length > 24 ? "…" : ""}」此事需先问人间 KPI，再禀玉帝定夺。`,
+        () => `二郎真君：本君已开天眼，凡间日志里似有三次 OOM，建议先镇内存妖。`,
+        () => `哪吒：若方案不成，吾还有莲藕化身七号，可再训一炉。`,
+        () => `李天王：塔内已分层缓存，近三日相似问法命中率可再抬一成。`,
+        () => `太上老君：丹方里加一味「人类反馈」，毒性自降，泛化自升。`,
+        () => `雷公：可拆三十六路并行，电母：但莫忘了锁与幂等。`,
+        () => `夸父：长文已逐段吞下，摘要呈于御前，细节在附录三山。`,
+        () => `织女：流水线已牵好，只待玉帝朱批一勾，即可下凡部署。`,
+        () => `玉帝：众卿所言甚是。敕令草拟中，赐福指数当随功德波动。`
+      ];
+
+      const hall = document.getElementById("hall");
+      const petition = document.getElementById("petition");
+      const decreeBox = document.getElementById("decreeBox");
+      const decreeText = document.getElementById("decreeText");
+      const loadingBar = document.getElementById("loadingBar");
+      const sotaNum = document.getElementById("sotaNum");
+      const deityBio = document.getElementById("deityBio");
+      const deityList = document.getElementById("deityList");
+      const apiBase = document.getElementById("apiBase");
+      const apiKey = document.getElementById("apiKey");
+      const apiModel = document.getElementById("apiModel");
+      const useLlm = document.getElementById("useLlm");
+      const saveKey = document.getElementById("saveKey");
+
+      const LS_BASE = "tianting_api_base";
+      const LS_MODEL = "tianting_api_model";
+      const LS_KEY = "tianting_api_key";
+      const LS_USE = "tianting_use_llm";
+      const LS_SAVEPREF = "tianting_save_key_pref";
+
+      function loadApiSettings() {
+        try {
+          apiBase.value = localStorage.getItem(LS_BASE) || "";
+          apiModel.value = localStorage.getItem(LS_MODEL) || "";
+          useLlm.checked = localStorage.getItem(LS_USE) === "1";
+          saveKey.checked = localStorage.getItem(LS_SAVEPREF) === "1";
+          if (saveKey.checked) apiKey.value = localStorage.getItem(LS_KEY) || "";
+        } catch (e) { /* ignore */ }
+      }
+      loadApiSettings();
+
+      document.getElementById("btnSaveApi").addEventListener("click", () => {
+        try {
+          localStorage.setItem(LS_BASE, apiBase.value.trim());
+          localStorage.setItem(LS_MODEL, apiModel.value.trim());
+          localStorage.setItem(LS_USE, useLlm.checked ? "1" : "0");
+          localStorage.setItem(LS_SAVEPREF, saveKey.checked ? "1" : "0");
+          if (saveKey.checked) localStorage.setItem(LS_KEY, apiKey.value.trim());
+          else localStorage.removeItem(LS_KEY);
+          addMsg("司礼监", "天曹设置已写入司命簿（本机）。", "system");
+        } catch (e) {
+          addMsg("司礼监", "无法写入本地存储：" + e, "system");
+        }
+      });
+      document.getElementById("btnClearKey").addEventListener("click", () => {
+        apiKey.value = "";
+        try {
+          localStorage.removeItem(LS_KEY);
+          saveKey.checked = false;
+          localStorage.setItem(LS_SAVEPREF, "0");
+          addMsg("司礼监", "已清除本机所存密钥。", "system");
+        } catch (e) { /* ignore */ }
+      });
+
+      let activeId = "yudi";
+      let channel = null;
+      try {
+        channel = new BroadcastChannel("tianting-taf");
+      } catch (e) {
+        document.getElementById("incenseHint").textContent = "此环境无 BroadcastChannel，协作降级为单机";
+      }
+
+      function renderDeities() {
+        deityList.innerHTML = DEITIES.map((d) => `
+          <div class="deity ${d.id === activeId ? "active" : ""}" data-id="${d.id}">
+            <div class="avatar">${d.emoji}</div>
+            <div>
+              <div class="name">${d.name}</div>
+              <div class="rank">${d.rank}</div>
+            </div>
+            <span class="tier">${d.tier}</span>
+          </div>
+        `).join("");
+        deityList.querySelectorAll(".deity").forEach((el) => {
+          el.addEventListener("click", () => {
+            activeId = el.dataset.id;
+            const d = DEITIES.find((x) => x.id === activeId);
+            deityBio.textContent = d ? `${d.name} — ${d.bio}` : "";
+            renderDeities();
+          });
+        });
+        const d = DEITIES.find((x) => x.id === activeId);
+        deityBio.textContent = d ? `${d.name} — ${d.bio}` : "";
+      }
+      renderDeities();
+
+      function addMsg(who, body, cls = "") {
+        const div = document.createElement("div");
+        div.className = "msg " + cls;
+        div.innerHTML = `<div class="who">${who}</div><div class="body"></div>`;
+        div.querySelector(".body").textContent = body;
+        hall.appendChild(div);
+        hall.scrollTop = hall.scrollHeight;
+      }
+
+      function hashStr(s) {
+        let h = 2166136261;
+        for (let i = 0; i < s.length; i++) {
+          h ^= s.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+      }
+
+      function pseudoRandom(seed) {
+        let x = seed;
+        return function () {
+          x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+          return (x >>> 0) / 4294967296;
+        };
+      }
+
+      function buildDecree(text) {
+        const h = hashStr(text || "空愿");
+        const rnd = pseudoRandom(h);
+        const goals = ["降本增效", "稳态上线", "指标封神", "评审一次过", "无感扩容"];
+        const g = goals[h % goals.length];
+        const lines = [
+          "奉天承运，玉帝诏曰：",
+          "",
+          `其一：凡间所陈「${(text || "（未书愿文）").slice(0, 200)}${text && text.length > 200 ? "…" : ""}」已录司命簿。`,
+          `其二：着太白金星润色旨意，二郎真君持戟执行，李天王镇塔守界，老君炉中加一味 RLHF，雷部并行以疾应之。`,
+          `其三：本期劫数主功名为「${g}」。若三日内焚香复盘，天运指数当再浮动。`,
+          "",
+          "钦此。"
+        ];
+        return lines.join("\n");
+      }
+
+      function finishCouncil(text, decree, meterSeed, fromRemote) {
+        decreeText.textContent = decree;
+        decreeBox.style.display = "block";
+        setMeters(typeof meterSeed === "number" ? meterSeed : hashStr(text + String(meterSeed)));
+        persist(text, decree);
+        if (channel && !fromRemote) {
+          channel.postMessage({ type: "council_done", text, decree, t: Date.now() });
+        }
+      }
+
+      function parseLlmMarkers(raw) {
+        const text = String(raw || "");
+        function block(tag) {
+          const a = text.indexOf("[" + tag + "]");
+          const b = text.indexOf("[/" + tag + "]");
+          if (a === -1 || b === -1 || b <= a) return "";
+          return text.slice(a + tag.length + 2, b).trim();
+        }
+        return {
+          xianyi: block("XIANYI"),
+          chiling: block("CHILING"),
+          zhixing: block("ZHIXING"),
+          full: text
+        };
+      }
+
+      function buildLlmSystemPrompt() {
+        return [
+          "你是「天庭智能体框架」的总执笔，需协同以下仙职：玉帝(编排验收)、太白金星(意图澄清)、二郎神(执行观测)、哪吒(重试分支)、李天王(记忆分层)、太上老君(优化对齐)、雷公电母(并行)、夸父(长上下文)、织女(流水线)。",
+          "用户会给出凡间任务/问题（祈愿）。你要给出可落地的技术或工作建议，语气可带一点神话修辞但不要空洞玄学。",
+          "输出必须严格包含三段，用下列标记包裹（标记本身也要输出）：",
+          "[XIANYI]",
+          "若干行凌霄仙议纪要，每行一条，前缀可带仙名与冒号，共 5～9 条。",
+          "[/XIANYI]",
+          "[CHILING]",
+          "玉帝敕令：用「奉天承运」体写 1 段诏书式文字（可含条款其一其二），明确目标、约束、验收口径。",
+          "[/CHILING]",
+          "[ZHIXING]",
+          "下凡执行清单：用有序列表 1. 2. 3. … 写出具体可执行步骤（含优先级、风险、度量若适用）。",
+          "[/ZHIXING]",
+          "除上述三段外不要输出其它大段前言后语；不要使用 Markdown 代码围栏包裹整段。"
+        ].join("\n");
+      }
+
+      async function runCouncilLLM(text, fromRemote) {
+        let base = apiBase.value.trim().replace(/\/+$/, "");
+        if (/\/v1$/i.test(base)) base = base.replace(/\/v1$/i, "").replace(/\/+$/, "");
+        const key = apiKey.value.trim();
+        const model = apiModel.value.trim() || "gpt-4o-mini";
+        if (!base || !key) {
+          addMsg("司礼监", "真模型模式需填写网关 Base URL 与 API Key，可先点「保存天曹设置」。", "system");
+          return;
+        }
+        if (!fromRemote) addMsg("凌霄殿", "愿文已呈送天曹，众仙候文昌阁回批……", "system");
+        loadingBar.classList.add("on");
+        const url = base + "/v1/chat/completions";
+        const userContent = [
+          "凡间祈愿如下，请按系统格式输出三段：",
+          "",
+          text
+        ].join("\n");
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + key
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: [
+                { role: "system", content: buildLlmSystemPrompt() },
+                { role: "user", content: userContent }
+              ],
+              temperature: 0.55,
+              max_tokens: 4096
+            })
+          });
+          const rawText = await res.text();
+          let data;
+          try {
+            data = JSON.parse(rawText);
+          } catch (e) {
+            throw new Error("响应非 JSON：" + rawText.slice(0, 180));
+          }
+          if (!res.ok) {
+            const errMsg = data.error && (data.error.message || data.error.code)
+              ? String(data.error.message || data.error.code)
+              : (data.message || res.status + " " + res.statusText);
+            throw new Error(errMsg);
+          }
+          const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          if (!content || !String(content).trim()) throw new Error("模型未返回正文");
+          const parts = parseLlmMarkers(content);
+          const lines = (parts.xianyi || "").split(/\n+/).map((s) => s.trim()).filter(Boolean);
+          if (lines.length) {
+            lines.forEach((line, idx) => addMsg(`仙议 ${idx + 1}/${lines.length}`, line));
+          } else {
+            addMsg("文昌阁", "未解析到 [XIANYI] 段，将全文呈于敕令匣备查。", "system");
+          }
+          const decreeBody = (parts.chiling || "").trim() || (parts.zhixing ? "（敕令段缺失，见下凡清单）" : parts.full.trim());
+          let decree = decreeBody;
+          if ((parts.zhixing || "").trim()) {
+            decree += "\n\n—— 下凡执行清单 ——\n\n" + parts.zhixing.trim();
+          }
+          if (!decree.trim()) decree = parts.full.trim();
+          finishCouncil(text, decree, hashStr(text + content), fromRemote);
+        } catch (e) {
+          addMsg("天曹驳回", String(e && e.message ? e.message : e), "system");
+          addMsg("司礼监", "真模型议政失败。若为 CORS，请用允许浏览器来源的网关或本地代理；也可取消勾选真模型改用殿内模拟。", "system");
+        } finally {
+          loadingBar.classList.remove("on");
+        }
+      }
+
+      function runCouncil(text, fromRemote) {
+        if (!fromRemote) {
+          addMsg("凌霄殿", "香烟缭绕，众仙班列。", "system");
+        }
+        loadingBar.classList.add("on");
+        const seed = hashStr(text + Date.now());
+        const rnd = pseudoRandom(seed);
+
+        const steps = [];
+        const n = 5 + Math.floor(rnd() * 4);
+        const t = text || "（空白愿文，众仙面面相觑）";
+        for (let i = 0; i < n; i++) {
+          const line = i === 0 ? DIALOGUES[0](t) : DIALOGUES[1 + Math.floor(rnd() * (DIALOGUES.length - 1))]();
+          steps.push({ delay: 380 + i * 420 + Math.floor(rnd() * 200), line });
+        }
+
+        let acc = 0;
+        steps.forEach((s, idx) => {
+          acc += s.delay;
+          setTimeout(() => {
+            addMsg(`仙议 ${idx + 1}/${steps.length}`, s.line);
+            if (idx === steps.length - 1) {
+              loadingBar.classList.remove("on");
+              const decree = buildDecree(text);
+              finishCouncil(text, decree, hashStr(text + String(seed)), fromRemote);
+            }
+          }, acc);
+        });
+      }
+
+      function setMeters(seed) {
+        const rnd = pseudoRandom(seed);
+        const vals = [0.72 + rnd() * 0.25, 0.68 + rnd() * 0.28, 0.75 + rnd() * 0.22, 0.7 + rnd() * 0.26];
+        const ids = [["m1", "m1v"], ["m2", "m2v"], ["m3", "m3v"], ["m4", "m4v"]];
+        requestAnimationFrame(() => {
+          vals.forEach((v, i) => {
+            const pct = Math.round(v * 100);
+            document.getElementById(ids[i][0]).style.width = pct + "%";
+            document.getElementById(ids[i][1]).textContent = pct + "%";
+          });
+        });
+        const sota = (91 + (seed % 9) + rnd() * 3).toFixed(1);
+        sotaNum.textContent = sota;
+      }
+
+      function persist(text, decree) {
+        try {
+          const key = "tianting_siming";
+          const prev = JSON.parse(localStorage.getItem(key) || "[]");
+          prev.unshift({ t: Date.now(), petition: text, decree });
+          localStorage.setItem(key, JSON.stringify(prev.slice(0, 50)));
+        } catch (e) { /* ignore */ }
+      }
+
+      document.getElementById("btnSummon").addEventListener("click", () => {
+        const text = petition.value.trim();
+        if (!text) {
+          addMsg("司礼监", "请先写下祈愿，再上香合议。", "system");
+          return;
+        }
+        const modeLlm = useLlm.checked;
+        if (channel) channel.postMessage({ type: "summon", text, t: Date.now(), useLlm: modeLlm });
+        if (modeLlm) void runCouncilLLM(text, false);
+        else runCouncil(text, false);
+      });
+
+      if (channel) {
+        channel.addEventListener("message", (ev) => {
+          if (ev.data && ev.data.type === "summon" && ev.data.text) {
+            petition.value = ev.data.text;
+            addMsg("协作信道", "他窗焚香，本殿同步召议。", "system");
+            if (ev.data.useLlm) void runCouncilLLM(ev.data.text, true);
+            else runCouncil(ev.data.text, true);
+          }
+        });
+      }
+
+      document.getElementById("btnClear").addEventListener("click", () => {
+        hall.innerHTML = "";
+        decreeBox.style.display = "none";
+        decreeText.textContent = "";
+        sotaNum.textContent = "—";
+        ["m1", "m2", "m3", "m4"].forEach((id) => { document.getElementById(id).style.width = "0%"; });
+        ["m1v", "m2v", "m3v", "m4v"].forEach((id) => { document.getElementById(id).textContent = "0%"; });
+      });
+
+      document.getElementById("btnExport").addEventListener("click", () => {
+        const text = decreeText.textContent;
+        if (!text) {
+          addMsg("司礼监", "尚无敕令可导出。", "system");
+          return;
+        }
+        const blob = new Blob([JSON.stringify({
+          framework: "Tianting Agent Framework",
+          version: "0.9",
+          exportedAt: new Date().toISOString(),
+          decree: text,
+          petition: petition.value.trim()
+        }, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "yudi-decree-" + Date.now() + ".json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        addMsg("司礼监", "敕令已封入 JSON，可传檄三界。", "system");
+      });
+
+      addMsg("司礼监", "天庭智能体框架已立。焚香合议，或开新窗共信道，皆可议政。", "system");
+    })();
+  </script>
+</body>
+</html>
