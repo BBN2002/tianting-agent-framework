@@ -158,17 +158,6 @@
       background: var(--cloud);
       border-color: rgba(212, 175, 55, 0.35);
     }
-    .deity .avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.15rem;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent);
-      border: 1px solid rgba(212, 175, 55, 0.3);
-    }
     .deity .name { font-weight: 600; font-size: 0.9rem; }
     .deity .rank { font-size: 0.7rem; color: #7d7190; }
     .deity .tier {
@@ -177,6 +166,110 @@
       border-radius: 4px;
       background: rgba(46, 230, 196, 0.12);
       color: var(--jade-bright);
+    }
+
+    /* 仙班小人：每位独立循环动画 */
+    .deity .avatar {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      overflow: visible;
+    }
+    .deity .sprite {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+    .deity .sprite-char {
+      display: inline-block;
+      line-height: 1;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+      will-change: transform;
+    }
+
+    @keyframes float-yudi {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-6px) scale(1.08); }
+    }
+    @keyframes sway-taibai {
+      0%, 100% { transform: rotate(-6deg) translateY(0); }
+      50% { transform: rotate(6deg) translateY(-3px); }
+    }
+    @keyframes scan-erlang {
+      0%, 100% { transform: translateX(0) scale(1); }
+      25% { transform: translateX(-3px) scale(1.05); }
+      75% { transform: translateX(3px) scale(1.05); }
+    }
+    @keyframes blaze-nezha {
+      0%, 100% { transform: rotate(-14deg) scale(1); }
+      50% { transform: rotate(14deg) scale(1.12); }
+    }
+    @keyframes tower-liguang {
+      0%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-4px); }
+      60% { transform: translateY(1px); }
+    }
+    @keyframes brew-laojun {
+      0%, 100% { transform: rotate(-4deg) translateY(0); }
+      50% { transform: rotate(4deg) translateY(-3px); }
+    }
+    @keyframes thunder-leigong {
+      0%, 100% { transform: translate(0, 0) rotate(0); }
+      10% { transform: translate(-2px, 1px) rotate(-3deg); }
+      20% { transform: translate(2px, -1px) rotate(3deg); }
+      30% { transform: translate(-1px, 0) rotate(-2deg); }
+      40% { transform: translate(1px, 1px) rotate(2deg); }
+      50%, 100% { transform: translate(0, 0) rotate(0); }
+    }
+    @keyframes chase-kuaifu {
+      0% { transform: translateX(-5px); }
+      100% { transform: translateX(5px); }
+    }
+    @keyframes weave-zhinv {
+      0%, 100% { transform: rotate(-8deg) translateY(0); }
+      50% { transform: rotate(8deg) translateY(-4px); }
+    }
+
+    .sprite-yudi .sprite-char { animation: float-yudi 2.8s ease-in-out infinite; }
+    .sprite-taibai .sprite-char { animation: sway-taibai 2.4s ease-in-out infinite; }
+    .sprite-erlang .sprite-char { animation: scan-erlang 2.2s ease-in-out infinite; }
+    .sprite-nezha .sprite-char { animation: blaze-nezha 0.55s ease-in-out infinite; }
+    .sprite-liguang .sprite-char { animation: tower-liguang 1.9s ease-in-out infinite; }
+    .sprite-laojun .sprite-char { animation: brew-laojun 3.2s ease-in-out infinite; }
+    .sprite-leigong .sprite-char { animation: thunder-leigong 1.4s ease-in-out infinite; }
+    .sprite-kuaifu .sprite-char { animation: chase-kuaifu 0.45s ease-in-out infinite alternate; }
+    .sprite-zhinv .sprite-char { animation: weave-zhinv 2.6s ease-in-out infinite; }
+
+    .deity.active .sprite-char {
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.55)) drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+    }
+    .deity.active .avatar::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid rgba(212, 175, 55, 0.45);
+      animation: ring-pulse 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes ring-pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sprite-char { animation: none !important; }
+      .deity.active .avatar::after { animation: none; opacity: 0.6; }
     }
 
     /* 中间 */
@@ -423,7 +516,7 @@
     <header>
       <h1>天庭智能体框架</h1>
       <p>Tianting Agent Framework — 多仙协同 · 敕令下达 · 赐福 SOTA</p>
-      <span class="badge">凌霄殿 v1.0 · 真模型敕令 · 协作信道</span>
+      <span class="badge">凌霄殿 v1.1 · 动态仙班 · 真模型敕令</span>
     </header>
 
     <div class="grid">
@@ -605,7 +698,9 @@
       function renderDeities() {
         deityList.innerHTML = DEITIES.map((d) => `
           <div class="deity ${d.id === activeId ? "active" : ""}" data-id="${d.id}">
-            <div class="avatar">${d.emoji}</div>
+            <div class="avatar" aria-hidden="true">
+              <span class="sprite sprite-${d.id}"><span class="sprite-char">${d.emoji}</span></span>
+            </div>
             <div>
               <div class="name">${d.name}</div>
               <div class="rank">${d.rank}</div>
