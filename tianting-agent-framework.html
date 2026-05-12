@@ -506,6 +506,184 @@
       line-height: 1.45;
       margin-top: 0.5rem;
     }
+
+    /* 实验归因 · 六爻灵感（阴阳调和） */
+    .attrib-panel {
+      margin-top: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .attrib-panel::before {
+      content: "";
+      position: absolute;
+      top: -40%;
+      right: -15%;
+      width: 55%;
+      height: 120%;
+      background: radial-gradient(ellipse, rgba(46, 230, 196, 0.06), transparent 70%);
+      pointer-events: none;
+    }
+    .attrib-lead {
+      font-size: 0.8rem;
+      color: #9a8fb0;
+      line-height: 1.6;
+      margin: -0.25rem 0 1rem;
+    }
+    .attrib-lead code {
+      font-size: 0.74rem;
+      background: rgba(0,0,0,0.35);
+      padding: 0.08rem 0.35rem;
+      border-radius: 4px;
+      color: var(--jade-bright);
+    }
+    .attrib-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .taiji-badge {
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.85rem;
+      line-height: 1;
+      background: radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.14), transparent 55%),
+        linear-gradient(145deg, rgba(26, 26, 34, 0.95), rgba(18, 24, 32, 0.98));
+      box-shadow: inset 0 0 0 2px rgba(212, 175, 55, 0.38), 0 0 22px rgba(46, 230, 196, 0.12);
+      animation: taiji-spin 22s linear infinite;
+    }
+    @keyframes taiji-spin {
+      to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .taiji-badge { animation: none; }
+      .yao-row { animation: none !important; opacity: 1; transform: none; }
+    }
+    .attrib-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .attrib-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .attrib-grid { grid-template-columns: 1fr; }
+    }
+    .yao-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      align-items: stretch;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+    .yao-row {
+      display: grid;
+      grid-template-columns: 2.4em 1fr;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: yao-pop 0.45s ease forwards;
+    }
+    .yao-row.reveal { opacity: 1; transform: none; }
+    @keyframes yao-pop {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .yao-name {
+      font-size: 0.68rem;
+      color: #7d7190;
+      text-align: right;
+    }
+    .yao-bar-wrap { position: relative; }
+    .yao-bar {
+      height: 12px;
+      border-radius: 4px;
+      overflow: visible;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      position: relative;
+    }
+    .yao-bar.yang {
+      background: linear-gradient(90deg, #5a4a2a, var(--gold), #f0e6c8);
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+    }
+    .yao-bar.yin {
+      display: flex;
+      gap: 10%;
+      background: rgba(0,0,0,0.35);
+      padding: 0 4%;
+      align-items: center;
+    }
+    .yao-bar.yin span {
+      flex: 1;
+      height: 8px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #2a3a48, var(--jade-bright), #2a4a50);
+      opacity: 0.85;
+    }
+    .yao-bar.changing::after {
+      content: "变";
+      position: absolute;
+      right: -1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.6rem;
+      color: var(--danger);
+      font-weight: 700;
+    }
+    .balance-row {
+      margin-top: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: #9a8fb0;
+    }
+    .balance-track {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      display: flex;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .balance-track .yang-part {
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      transition: width 0.6s ease;
+      flex-shrink: 0;
+      min-width: 4px;
+    }
+    .balance-track .yin-part {
+      background: linear-gradient(90deg, #1a3a40, var(--jade));
+      transition: width 0.6s ease;
+      flex-shrink: 0;
+      min-width: 4px;
+    }
+    .attrib-readout {
+      font-size: 0.86rem;
+      line-height: 1.65;
+      color: #dcd6e8;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-left: 3px solid var(--jade-bright);
+      white-space: pre-wrap;
+    }
+    .attrib-arch {
+      font-size: 0.72rem;
+      color: #6d6580;
+      margin-top: 0.85rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-family: ui-monospace, monospace;
+    }
   </style>
 </head>
 <body>
@@ -516,7 +694,7 @@
     <header>
       <h1>天庭智能体框架</h1>
       <p>Tianting Agent Framework — 多仙协同 · 敕令下达 · 赐福 SOTA</p>
-      <span class="badge">凌霄殿 v1.1 · 动态仙班 · 真模型敕令</span>
+      <span class="badge">凌霄殿 v1.2 · 六爻归因 · 动态仙班</span>
     </header>
 
     <div class="grid">
@@ -603,6 +781,43 @@
         </p>
       </aside>
     </div>
+
+    <section class="panel attrib-panel" id="attribPanel" aria-labelledby="attribHeading">
+      <h2 id="attribHeading"><span class="icon">☯</span> 实验归因 · 六爻灵感</h2>
+      <p class="attrib-lead">
+        借鉴<strong>六爻</strong>里「三钱成爻、六爻成卦」的<strong>阴阳消长</strong>直觉，把「卦」当作<strong>实验归因的启发式检查单</strong>：不卜吉凶，只拆<strong>可能因</strong>与<strong>阴阳调和</strong>（过刚则收、过柔则扬）。
+        架构上采用 <strong>Inspired-by-React</strong> 思路：<code>immutable state</code>、<code>dispatch(action)</code>、<code>reducer</code>、<code>render(state)</code> 单数据流（本页仍为原生 JS，无 React 依赖）。
+      </p>
+      <div class="attrib-head">
+        <div class="taiji-badge" title="阴阳调和" aria-hidden="true">☯</div>
+        <div style="flex:1;min-width:200px;">
+          <p style="margin:0 0 0.5rem;font-size:0.82rem;color:#c8bfd8;">以祈愿文为「问因」之引，三枚钱各为 2（阴）或 3（阳），三枚之和为 6～9 定一爻；自下而上六次得六爻。6=老阴、7=少阳、8=少阴、9=老阳（老爻为变爻，模拟中用于加重该爻对应维度权重）。</p>
+          <div class="attrib-actions">
+            <button type="button" class="btn-primary" id="btnCastYao">摇卦 · 拆因</button>
+            <button type="button" class="btn-ghost" id="btnResetYao">归元 · 清空卦象</button>
+          </div>
+        </div>
+      </div>
+      <div class="attrib-grid">
+        <div>
+          <div style="font-size:0.78rem;color:#7d7190;margin-bottom:0.5rem;text-align:center;">卦象（初爻在下）</div>
+          <div class="yao-wrap" id="yaoStack" aria-live="polite"></div>
+          <div class="balance-row">
+            <span>阳</span>
+            <div class="balance-track" title="阴阳比例">
+              <div class="yang-part" id="yangBalance" style="width:50%"></div>
+              <div class="yin-part" id="yinBalance" style="width:50%"></div>
+            </div>
+            <span>阴</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:0.78rem;color:#7d7190;margin-bottom:0.5rem;">归因启发（模拟 · 非统计结论）</div>
+          <div class="attrib-readout" id="attribReadout">尚未起卦。可先写祈愿，再摇卦；或直接摇卦以当前空愿为随机种子。</div>
+          <p class="attrib-arch" id="attribArch">state = { phase, yaos[], changing[], balance, narrative } · dispatch → reducer → render</p>
+        </div>
+      </div>
+    </section>
 
     <footer>神话智能体仅供灵感与演示 · 真 SOTA 仍需炼丹与数据 · 愿代码无 bug，愿评审皆过</footer>
   </div>
@@ -985,6 +1200,192 @@
         URL.revokeObjectURL(a.href);
         addMsg("司礼监", "敕令已封入 JSON，可传檄三界。", "system");
       });
+
+      /* ========= 实验归因 · 六爻模块（Inspired-by-React：immutable state + reducer + render） ========= */
+      (function YaoAttributionRuntime() {
+        const YAO_LABELS = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
+        const DIMENSIONS = [
+          { name: "基线与复现", hints: ["对照论文/文档核对实现细节", "固定随机种子与数据划分是否一致", "依赖版本是否锁死"] },
+          { name: "数据与分布", hints: ["训练/验证分布偏移或时段效应", "标注噪声与长尾类", "泄漏：未来信息进特征"] },
+          { name: "训练动态", hints: ["学习率与 warmup 是否匹配 batch", "过拟合曲线：train↑ val 平/降", "梯度裁剪与 loss 尖峰"] },
+          { name: "容量与归纳偏置", hints: ["模型容量相对数据量过大/过小", "归纳偏置与任务是否错配"] },
+          { name: "评估与指标", hints: ["主指标是否对业务目标敏感", "置信区间与多次试验方差"] },
+          { name: "系统与混杂", hints: ["I/O、缓存、非确定性算子", "多机时钟与配置漂移"] }
+        ];
+
+        const ATTRIB_INIT = {
+          phase: "idle",
+          yaos: [],
+          changing: [],
+          yangRatio: 0.5,
+          narrative: "",
+          seed: 0
+        };
+
+        function tossYaoLine(rnd) {
+          let s = 0;
+          for (let i = 0; i < 3; i++) s += rnd() < 0.5 ? 2 : 3;
+          return s;
+        }
+
+        function lineIsYang(v) { return v === 7 || v === 9; }
+        function lineIsChanging(v) { return v === 6 || v === 9; }
+
+        function buildNarrative(yaos, seed) {
+          const yang = yaos.filter(lineIsYang).length;
+          const yin = 6 - yang;
+          const chIdx = yaos.map((v, i) => (lineIsChanging(v) ? i : -1)).filter((i) => i >= 0);
+          const rnd = pseudoRandom(seed ^ hashStr(yaos.join(",")));
+          let harmony;
+          if (yang >= 5) harmony = "【阴阳调和】阳刚偏旺：宜「收」——加强正则/数据增广/早停，复查是否过拟合与指标过于乐观。";
+          else if (yin >= 5) harmony = "【阴阳调和】阴柔偏盛：宜「扬」——检查信号是否过弱：特征表达、学习率下限、或评价是否对改进不敏感。";
+          else harmony = "【阴阳调和】刚柔相济：保持当前对照实验节奏，优先验证变爻所标维度。";
+
+          const linesOut = [];
+          linesOut.push("── 六爻拆因（启发式，非因果推断）──");
+          linesOut.push("本卦爻值（自下而上）：" + yaos.join(" · ") + "  （6老阴 7少阳 8少阴 9老阳）");
+          linesOut.push("阳爻 " + yang + " / 阴爻 " + yin + (chIdx.length ? "  ·  变爻位：" + chIdx.map((i) => YAO_LABELS[i]).join("、") : "  ·  无变爻"));
+          linesOut.push("");
+          if (chIdx.length) {
+            linesOut.push("变爻优先排查：");
+            chIdx.forEach((i) => {
+              const d = DIMENSIONS[i];
+              linesOut.push("· " + YAO_LABELS[i] + "（" + d.name + "）：" + d.hints[Math.floor(rnd() * d.hints.length)]);
+            });
+            linesOut.push("");
+          }
+          linesOut.push("其余检查项：");
+          const picks = [];
+          const pool = DIMENSIONS.map((d, i) => ({ i, h: d.hints[Math.floor(rnd() * d.hints.length)], t: d.name }));
+          while (picks.length < 3 && pool.length) {
+            const j = Math.floor(rnd() * pool.length);
+            picks.push(pool.splice(j, 1)[0]);
+          }
+          picks.forEach((p) => linesOut.push("· " + p.t + "：" + p.h));
+          linesOut.push("");
+          linesOut.push(harmony);
+          linesOut.push("");
+          linesOut.push("下一步：把以上当作假设树，用消融/对照实验逐条证伪；与凌霄议政、敕令结论交叉比对。");
+          return linesOut.join("\n");
+        }
+
+        function computeCast(seed) {
+          const rnd = pseudoRandom(seed);
+          const yaos = [];
+          for (let i = 0; i < 6; i++) yaos.push(tossYaoLine(rnd));
+          const yang = yaos.filter(lineIsYang).length;
+          const yangRatio = yang / 6;
+          const changing = yaos.map((v) => lineIsChanging(v));
+          const narrative = buildNarrative(yaos, seed);
+          return { yaos, changing, yangRatio, narrative, seed };
+        }
+
+        function attribReducer(state, action) {
+          switch (action.type) {
+            case "RESET":
+              return { ...ATTRIB_INIT };
+            case "CAST_COMPLETE":
+              return {
+                ...state,
+                phase: "ready",
+                yaos: action.yaos,
+                changing: action.changing,
+                yangRatio: action.yangRatio,
+                narrative: action.narrative,
+                seed: action.seed
+              };
+            default:
+              return state;
+          }
+        }
+
+        let attribState = { ...ATTRIB_INIT };
+        const yaoStack = document.getElementById("yaoStack");
+        const attribReadout = document.getElementById("attribReadout");
+        const attribArch = document.getElementById("attribArch");
+        const yangBalance = document.getElementById("yangBalance");
+        const yinBalance = document.getElementById("yinBalance");
+
+        function dispatchAttrib(action) {
+          attribState = attribReducer(attribState, action);
+          renderAttrib();
+        }
+
+        function renderOneYaoRow(value, index, delayMs) {
+          const row = document.createElement("div");
+          row.className = "yao-row";
+          row.style.animationDelay = (delayMs / 1000) + "s";
+          const yang = lineIsYang(value);
+          const ch = lineIsChanging(value);
+          const name = document.createElement("div");
+          name.className = "yao-name";
+          name.textContent = YAO_LABELS[index];
+          const wrap = document.createElement("div");
+          wrap.className = "yao-bar-wrap";
+          const bar = document.createElement("div");
+          bar.className = "yao-bar " + (yang ? "yang" : "yin") + (ch ? " changing" : "");
+          if (yang) {
+            bar.innerHTML = "";
+          } else {
+            bar.innerHTML = "<span></span><span></span>";
+          }
+          wrap.appendChild(bar);
+          row.appendChild(name);
+          row.appendChild(wrap);
+          yaoStack.appendChild(row);
+        }
+
+        function renderAttrib() {
+          const pct = Math.round(attribState.yangRatio * 100);
+          yangBalance.style.width = pct + "%";
+          yinBalance.style.width = (100 - pct) + "%";
+          attribReadout.textContent = attribState.phase === "idle"
+            ? "尚未起卦。可先写祈愿，再摇卦；或直接摇卦以当前空愿为随机种子。"
+            : attribState.narrative;
+          attribArch.textContent =
+            "dispatch({type}) → attribReducer → immutable state | 本卦 seed=0x" +
+            (attribState.seed >>> 0).toString(16) +
+            " | phase=" +
+            attribState.phase;
+        }
+
+        function runCastAnimation(result) {
+          yaoStack.innerHTML = "";
+          for (let i = 5; i >= 0; i--) {
+            (function (idx, delay) {
+              setTimeout(() => renderOneYaoRow(result.yaos[idx], idx, 0), delay);
+            })(i, (5 - i) * 320);
+          }
+          setTimeout(() => {
+            dispatchAttrib({
+              type: "CAST_COMPLETE",
+              yaos: result.yaos,
+              changing: result.changing,
+              yangRatio: result.yangRatio,
+              narrative: result.narrative,
+              seed: result.seed
+            });
+          }, 6 * 320 + 120);
+        }
+
+        document.getElementById("btnCastYao").addEventListener("click", () => {
+          const text = petition.value.trim();
+          const seed = hashStr(text + "|yao|" + Date.now());
+          dispatchAttrib({ type: "RESET" });
+          yaoStack.innerHTML = "";
+          attribReadout.textContent = "摇卦中…";
+          attribArch.textContent = "phase=casting · reducer 仅在成卦后提交 CAST_COMPLETE";
+          const result = computeCast(seed);
+          result.seed = seed;
+          runCastAnimation(result);
+        });
+
+        document.getElementById("btnResetYao").addEventListener("click", () => {
+          dispatchAttrib({ type: "RESET" });
+          yaoStack.innerHTML = "";
+          renderAttrib();
+        });
+      })();
 
       addMsg("司礼监", "天庭智能体框架已立。焚香合议，或开新窗共信道，皆可议政。", "system");
     })();
